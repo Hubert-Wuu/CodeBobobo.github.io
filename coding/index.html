@@ -49,15 +49,19 @@
   };
 </script>
 
-  <meta property="og:type" content="website">
-<meta property="og:title" content="coding">
+  <meta name="description" content="Go语言并发编程  采用CSP（Communication Sequential Process）模型 编程时不需要锁，不需要callback 适合分布式   （〇）Go运行时调度机制 （一）并发版Hello World  Go并发编程的核心就是go和chan，也即Goroutine和通道。  1.创建helloworldconc目录，创建conc.go：123456789101112131415">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Go运行时调度机制">
 <meta property="og:url" content="http:&#x2F;&#x2F;yoursite.com&#x2F;coding&#x2F;index.html">
-<meta property="og:site_name" content="Hexo">
+<meta property="og:site_name" content="Bobobo的博客">
+<meta property="og:description" content="Go语言并发编程  采用CSP（Communication Sequential Process）模型 编程时不需要锁，不需要callback 适合分布式   （〇）Go运行时调度机制 （一）并发版Hello World  Go并发编程的核心就是go和chan，也即Goroutine和通道。  1.创建helloworldconc目录，创建conc.go：123456789101112131415">
 <meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https:&#x2F;&#x2F;dragonbaby308.oss-cn-hangzhou.aliyuncs.com&#x2F;GoLang&#x2F;goroutine.jpg">
 <meta property="article:published_time" content="2019-12-26T13:44:53.000Z">
-<meta property="article:modified_time" content="2019-12-26T13:44:53.771Z">
-<meta property="article:author" content="John Doe">
+<meta property="article:modified_time" content="2019-12-26T16:29:19.331Z">
+<meta property="article:author" content="Bobobo">
 <meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https:&#x2F;&#x2F;dragonbaby308.oss-cn-hangzhou.aliyuncs.com&#x2F;GoLang&#x2F;goroutine.jpg">
 
 <link rel="canonical" href="http://yoursite.com/coding/">
 
@@ -71,7 +75,7 @@
   };
 </script>
 
-  <title>coding | Hexo
+  <title>Go运行时调度机制 | Bobobo的博客
   </title>
   
 
@@ -103,7 +107,7 @@
   </style>
 </noscript>
 
-<link rel="alternate" href="/atom.xml" title="Hexo" type="application/atom+xml">
+<link rel="alternate" href="/atom.xml" title="Bobobo的博客" type="application/atom+xml">
 </head>
 
 <body itemscope itemtype="http://schema.org/WebPage">
@@ -117,7 +121,7 @@
     <div>
       <a href="/" class="brand" rel="start">
         <span class="logo-line-before"><i></i></span>
-        <span class="site-title">Hexo</span>
+        <span class="site-title">Bobobo的博客</span>
         <span class="logo-line-after"><i></i></span>
       </a>
     </div>
@@ -154,11 +158,6 @@
         <li class="menu-item menu-item-shoot">
 
     <a href="/shoot/" rel="section"><i class="fa fa-fw fa-camera"></i>摄影</a>
-
-  </li>
-        <li class="menu-item menu-item-friend-link">
-
-    <a href="/link/" rel="section"><i class="fa fa-fw fa-link"></i>友链</a>
 
   </li>
       <li class="menu-item menu-item-search">
@@ -216,7 +215,7 @@
     <div class="post-block" lang="zh-CN">
       <header class="post-header">
 
-<h1 class="post-title" itemprop="name headline">coding
+<h1 class="post-title" itemprop="name headline">Go运行时调度机制
 </h1>
 
 <div class="post-meta">
@@ -230,7 +229,26 @@
       
       
       <div class="post-body">
-          
+          <p><strong>Go语言并发编程</strong></p>
+<ul>
+<li>采用CSP（Communication Sequential Process）模型</li>
+<li>编程时不需要锁，不需要callback</li>
+<li>适合分布式</li>
+</ul>
+<hr>
+<p><strong>（〇）Go运行时调度机制</strong><br><img src="https://dragonbaby308.oss-cn-hangzhou.aliyuncs.com/GoLang/goroutine.jpg" alt="Go"></p>
+<p><strong>（一）并发版Hello World</strong></p>
+<blockquote>
+<p>Go并发编程的核心就是go和chan，也即Goroutine和通道。</p>
+</blockquote>
+<pre><code>1.创建helloworldconc目录，创建conc.go：</code></pre><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line">package main</span><br><span class="line">&#x2F;&#x2F;Go语言中package后的目录名可以和实际目录不一致，main表明该文件是个可执行文件</span><br><span class="line"></span><br><span class="line">import(</span><br><span class="line">  &quot;fmt&quot;</span><br><span class="line">)</span><br><span class="line"></span><br><span class="line">func main()  &#123;</span><br><span class="line">  &#x2F;&#x2F;:&#x3D;变量声明，并赋初值</span><br><span class="line">  ch :&#x3D; make(chan string)   &#x2F;&#x2F;定义管道</span><br><span class="line"></span><br><span class="line">  for i :&#x3D; 0; i &lt; 5; i++ &#123;</span><br><span class="line">    &#x2F;&#x2F;通过go关键字可以开启一个Goroutine</span><br><span class="line">    go printHelloWorld(i, ch)</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  &#x2F;&#x2F;从通道获取消息</span><br><span class="line">  for &#123;</span><br><span class="line">    msg :&#x3D; &lt;- ch</span><br><span class="line">    fmt.Println(msg)</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">func printHelloWorld(i int, ch chan string)  &#123;</span><br><span class="line">  for &#123;</span><br><span class="line">    &#x2F;&#x2F;如果使用了像%d一样的format参数，就需要用到Printf，不能用Println</span><br><span class="line">    ch &lt;- fmt.Sprintf(&quot;Hello World from Goroutine %d\n&quot;, i) &#x2F;&#x2F;将字符串送入管道</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<pre><code>2. run conc.go，不断循环输出：</code></pre><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">Hello World from Goroutine 3</span><br><span class="line">Hello World from Goroutine 4</span><br><span class="line">Hello World from Goroutine 1</span><br><span class="line">Hello World from Goroutine 2</span><br><span class="line">Hello World from Goroutine 0</span><br></pre></td></tr></table></figure>
+<hr>
+<p>**（二）并行计算<br>    1.新建目录pipeline<br>    2.创建nodes.go，不包括main函数：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br></pre></td><td class="code"><pre><span class="line">package pipeline</span><br><span class="line"></span><br><span class="line">import &quot;sort&quot;</span><br><span class="line"></span><br><span class="line">&#x2F;&#x2F;&#x2F;...表示可变长参数</span><br><span class="line">&#x2F;&#x2F;&lt;-表明这个返回的通道是只出不进的</span><br><span class="line">func ArraySource(a ...int) &lt;-chan int &#123;</span><br><span class="line">  &#x2F;&#x2F;创建通道</span><br><span class="line">  out :&#x3D; make(chan int)</span><br><span class="line"></span><br><span class="line">  &#x2F;&#x2F;创建Goroutine，将数组中的元素输送到通道</span><br><span class="line">  go func() &#123;</span><br><span class="line">    for _, v :&#x3D; range a &#123;</span><br><span class="line">      out &lt;- v</span><br><span class="line">    &#125;</span><br><span class="line">    &#x2F;&#x2F;关闭通道</span><br><span class="line">    close(out)</span><br><span class="line">  &#125;()</span><br><span class="line"></span><br><span class="line">  return out</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">&#x2F;&#x2F;排序单个通道</span><br><span class="line">func InMemSort(in &lt;-chan int) &lt;-chan int &#123;</span><br><span class="line">  out :&#x3D; make(chan int)</span><br><span class="line">  go func() &#123;</span><br><span class="line">    a :&#x3D; []int&#123;&#125;</span><br><span class="line">    &#x2F;&#x2F;将输入通道中的数据加入切片中</span><br><span class="line">    for v :&#x3D; range in &#123;</span><br><span class="line">      a &#x3D; append(a, v)</span><br><span class="line">    &#125;</span><br><span class="line">    &#x2F;&#x2F;排序</span><br><span class="line">    sort.Ints(a)</span><br><span class="line">    &#x2F;&#x2F;输出</span><br><span class="line">    for _, v :&#x3D; range a &#123;</span><br><span class="line">      out &lt;- v</span><br><span class="line">    &#125;</span><br><span class="line">    &#x2F;&#x2F;关闭通道</span><br><span class="line">    close(out)</span><br><span class="line">  &#125;()</span><br><span class="line">  return out</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">&#x2F;&#x2F;归并</span><br><span class="line">func Merge(in1, in2 &lt;-chan int) &lt;-chan int &#123;</span><br><span class="line">  out :&#x3D; make(chan int)</span><br><span class="line">  go func() &#123;</span><br><span class="line">    v1, ok1 :&#x3D; &lt;-in1</span><br><span class="line">    v2, ok2 :&#x3D; &lt;-in2</span><br><span class="line">    for ok1 || ok2 &#123;</span><br><span class="line">      if !ok2 || (ok1 &amp;&amp; v1 &lt;&#x3D; v2) &#123;</span><br><span class="line">        out &lt;- v1</span><br><span class="line">        v1, ok1 &#x3D;  &lt;-in1</span><br><span class="line">      &#125; else &#123;</span><br><span class="line">        out &lt;- v2</span><br><span class="line">        v2, ok2 &#x3D;  &lt;-in2</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    close(out)</span><br><span class="line">  &#125;()</span><br><span class="line">  return out</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<pre><code>3.创建可执行文件main.go：</code></pre><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">package main</span><br><span class="line"></span><br><span class="line">func main() &#123;</span><br><span class="line">  p :&#x3D; pipeline.Merge(</span><br><span class="line">    pipeline.InMemSort(pipeline.ArraySource(3, 2, 6, 7, 4)),</span><br><span class="line">    pipeline.InMemSort(pipeline.ArraySource(7, 4, 0, 3, 2, 8, 13)))</span><br><span class="line">  for &#123;</span><br><span class="line">    &#x2F;&#x2F;通过if子句，从通道获取数组元素</span><br><span class="line">    if num, ok :&#x3D; &lt;- p; ok &#123;</span><br><span class="line">      fmt.Println(num)</span><br><span class="line">    &#125; else &#123;</span><br><span class="line">      break</span><br><span class="line">    &#125;</span><br><span class="line">    &#x2F;&#x2F;等价于：</span><br><span class="line">    &#x2F;&#x2F; for v :&#x3D; range p &#123;</span><br><span class="line">    &#x2F;&#x2F;   fmt.Println(v)</span><br><span class="line">    &#x2F;&#x2F; &#125;</span><br><span class="line"></span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>输出：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">0</span><br><span class="line">2</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">4</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">13</span><br></pre></td></tr></table></figure>
       </div>
       
       
@@ -295,7 +313,9 @@
       <!--/noindex-->
 	  <div class="site-overview-wrap sidebar-panel">
         <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
-  <p class="site-author-name" itemprop="name">John Doe</p>
+    <img class="site-author-image" itemprop="image" alt="Bobobo"
+      src="/images/BlackCat.jfif">
+  <p class="site-author-name" itemprop="name">Bobobo</p>
   <div class="site-description" itemprop="description"></div>
 </div>
 <div class="site-state-wrap motion-element">
@@ -305,6 +325,14 @@
           <span class="site-state-item-count">2</span>
           <span class="site-state-item-name">日志</span>
         </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+        <span class="site-state-item-count">1</span>
+        <span class="site-state-item-name">分类</span>
+      </div>
+      <div class="site-state-item site-state-tags">
+        <span class="site-state-item-count">1</span>
+        <span class="site-state-item-name">标签</span>
       </div>
   </nav>
 </div>
@@ -349,13 +377,15 @@
   <span class="with-love">
     <i class="fa fa-user"></i>
   </span>
-  <span class="author" itemprop="copyrightHolder">John Doe</span>
+  <span class="author" itemprop="copyrightHolder">Bobobo</span>
 </div>
+##隐藏hexo驱动
+<!--
   <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> 强力驱动 v4.1.1
   </div>
   <span class="post-meta-divider">|</span>
   <div class="theme-info">主题 – <a href="https://pisces.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Pisces</a> v7.6.0
-  </div>
+  </div>-->
 
         
 <div class="busuanzi-count">
